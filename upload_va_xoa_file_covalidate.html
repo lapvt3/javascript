@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Thêm sửa file ảnh với javascript</title>
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+</head>
+<style>
+    .note #khoimage:hover {
+        cursor: pointer;
+    }
+    
+    .note #khoimage {
+        position: relative;
+    }
+    
+    .hidden {
+        display: none;
+    }
+    
+    .note .icon_delete_img {
+        position: absolute;
+        right: 16px;
+        font-size: 18px;
+        cursor: pointer;
+        color: red;
+        display: inline-block;
+        font-family: 'Glyphicons Halflings';
+        font-style: normal;
+        font-weight: 400;
+        line-height: 1;
+        top: 5px;
+        right: 10px;
+        display: none;
+        background: white;
+        border-radius: 6px;
+        padding: 8px;
+    }
+    
+    .note .noteImage {
+        width: 210px;
+        margin-bottom: 10px;
+    }
+    
+    .note .err2 {
+        color: red;
+        font-weight: normal;
+    }
+    
+    .itemimg {
+        width: 200px;
+        float: left;
+        position: relative;
+        margin: 2px;
+    }
+    
+    .itemimg>img {
+        width: 100%;
+        height: 150px;
+    }
+    
+    .itemimg .delete {
+        position: absolute;
+        right: 1px;
+        background: red;
+        border: 0px;
+        padding: 10px;
+        color: white;
+        border-radius: 4px;
+        top: 1px
+    }
+    
+    .file_edit {
+        display: none;
+    }
+    
+    .list_img_and_file {
+        width: 90%;
+        float: left;
+        padding: 10px;
+        border: 1px solid #d5cece;
+        margin: auto;
+        margin-top: 20px;
+        min-height: 100px;
+    }
+    
+    .error {
+        color: red;
+    }
+</style>
+
+<body>
+    <h3>Select Image to Show</h3>
+    <div class="note">
+        <div class="noteImage" id="khoimage">
+            <img src="img/add-icon.png" class="product-img" id="view_img_1" style="margin-top: -35px; margin-left:-20px; width:200px; height:200px;">
+            <img id="output" width="100%" height="" src="" style="display:none">
+            <i class="glyphicon-remove-sign icon_delete_img">X</i>
+            <p>
+                <span>
+            <strong class="err2"></strong>
+        </span>
+            </p>
+        </div>
+        <br>
+        <input type="file" class="upfile hidden" name="note_img" accept="image/*">
+    </div>
+    <hr>
+    <h3>Multi file upload</h3>
+    <div class="multifile">
+        <button id="choosefile">Choose File</button>
+        <input type="file" class="upfile_multifile hidden" multiple="true" name="note_img" accept="image/*">
+    </div>
+    <div class="list_img_and_file">
+    </div>
+</body>
+<script src="core.js"></script>
+<script>
+    $(document).ready(function() {
+        $('body').on('click', '#khoimage', function() {
+            $('.upfile').trigger('click');
+        });
+        $('body').on('change', '.upfile', function(e) {
+            let v = $(this).val();
+            if (v === '') {
+                return false;
+            } else {
+                var datafile = v.split('.').pop().toLowerCase();
+                var resultCheckFile = check_type_file(datafile);
+                if (resultCheckFile != 1) {
+                    $('#output').show();
+                    $('.icon_delete_img').show();
+                    $('#output').attr('src', '#');
+                    $('#output').css('height', 200);
+                    $('#view_img_1').hide();
+                    console.log('loi dinh dang');
+                } else {
+                    var datafile = e.target.files[0];
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#output').show();
+                        $('#output').css('height', 'auto');
+                        $('.icon_delete_img').show();
+                        $('#output').attr('src', e.target.result);
+                        $('#view_img_1').hide();
+                    }
+                    reader.readAsDataURL(datafile);
+                    if (datafile.size >= 7042880) {
+                        $('.err2').text('画像のサイズは5MB以内です。')
+                        return false;
+                    } else {
+                        $('.btnSave').removeAttr('disabled');
+                        $('.err2').text('');
+                        return false;
+                    }
+                }
+            }
+        });
+        $('body').on('click', '.icon_delete_img', function() {
+            $('#output').attr('src', '');
+            $('#output').hide();
+            $('.upfile').val('');
+            $(this).hide();
+            $('#view_img_1').show();
+            $('.err2').text('');
+            $('.btnSave').removeAttr('disabled');
+            return false;
+        });
+        // xử lý upload nhiều file
+        $('body').on('click', '#choosefile', function() {
+            $('.upfile_multifile').trigger('click');
+        });
+        $('body').on('change', '.upfile_multifile', function(e) {
+            var file = e.target.files;
+            for (var i = 0; i < file.length; i++) {
+                if (file && file[i]) {
+                    let nameimg = file[i].name;
+                    let size = file[i].size;
+                    let type = file[i].type.split('/');
+                    let type_file = type[1];
+                    var resultCheckFile2 = check_type_file(type_file);
+                    console.log(resultCheckFile2);
+                    let id = 'editImg' + i;
+                    let errorId = 'err' + i;
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var frame_image = '<div class="itemimg"><img ';
+                        frame_image += 'id="' + id + '"';
+                        frame_image += 'src="' + e.target.result + '" alt="your image" />';
+                        frame_image += '<button class="delete" nameimg="' + nameimg + '">' + 'X </button>';
+                        frame_image += '<input type="hidden" class="file_delete" name="file_delete[]">';
+                        frame_image += '<input type="file" class="file_edit" name="file_edit[]" dataid="' + id + '">';
+                        frame_image += '<button class="trigger_edit_image">Change</button>';
+                        if (size > 7042880) {
+                            frame_image += '<p class="error"> Dung lượng file quá 5M' + '</p>';
+                        } else {
+                            frame_image += '<p class="error"></p>';
+                        }
+                        if (resultCheckFile2 === '') {
+                            frame_image += '<p class="error">Sai định dạng file' + '</p></div>';
+                        } else {
+                            frame_image += '<p class="error"></p></div>';
+                        }
+                        $('.list_img_and_file').append(frame_image);
+                    }
+                    reader.readAsDataURL(file[i]);
+                }
+            }
+        });
+        $('body').on('click', '.delete', function() {
+            var imgname = $(this).attr('nameimg');
+            $(this).next().val(imgname);
+            $(this).next().next().next().hide();
+            $(this).prev().hide();
+            $(this).parent().hide();
+            $(this).hide();
+        })
+        $('body').on('click', '.trigger_edit_image', function() {
+            $(this).prev().trigger('click');
+        });
+        $('body').on('change', '.file_edit', function(e) {
+            var file = e.target.files[0];
+            var id_img_edit = '#' + $(this).attr('dataid');
+            console.log(id_img_edit);
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $(id_img_edit).attr('src', e.target.result);
+            }
+            reader.readAsDataURL(file);
+            if (file.size > 7042880) {
+                $(this).next().next().text('Dung lượng file quá 5M');
+                return false;
+            } else {
+                $(this).next().next().text('');
+            }
+        });
+    })
+</script>
+<!--viết ngày 6/5/2022 tai adnetplus-->
+
+</html>
