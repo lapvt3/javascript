@@ -1,0 +1,16 @@
+{
+    "name": "lapvt/hoanganhbuon",
+    "description": "hoanganh",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Lapvt\\Hoanganhbuon\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "lapvt3"
+        }
+    ],
+    "require": {}
+}
